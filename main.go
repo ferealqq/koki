@@ -107,14 +107,29 @@ var mKeys = map[string]uint16{
 
 }
 
+var (
+	KEYPRESS = "KEYPRESS"
+	KEYRELEASE = "KEYRELEASE"
+	AUTOREPEAST = "AUTOREPEAT"
+	UNKNOWN = "UNKNOWN"
+)
+
+// event value correlating human readable translation, Source: https://www.kernel.org/doc/Documentation/input/input.txt
+var valueMap = map[string]uint16{
+	KEYPRESS: 0, 
+	KEYRELEASE: 1,
+	AUTOREPEAST: 2,
+	// everything else is unknown for example there is no documentation what does the value 4 corralate to 
+	UNKNOWN: 3,	
+}
+
 //https://www.kernel.org/doc/Documentation/input/input.txt
 type KeyEvent struct {
 	gorm.Model
-	Time time.Time
+	Time int64
 	Code uint16
 	Type uint16
 	Value int32
-	CreatedAt   time.Time
 
 	Char string
 }
@@ -198,16 +213,17 @@ func main() {
 		c, ok := r2key[code]
 		if ok {
 			fmt.Println(t)
+			evt := &KeyEvent{
+				Time: t.UnixNano(),
+				Char: c,
+				Value: value,
+				Code: code,
+				Type: typ,
+			}
 			if value == 1 {
 				fmt.Printf("KEYPRESSED\ntype: %x\ncode: %d\nvalue: %d\nchar: %s\n", typ, code, value,c)
 				if m.TryLock() {
-					list = append(list,&KeyEvent{
-						Time: t,
-						Char: c,
-						Value: value,
-						Code: code,
-						Type: typ,
-					})
+					list = append(list,evt)
 					m.Unlock()				
 					timeTrack(n, "Keypress")
 				}else{
@@ -216,9 +232,24 @@ func main() {
 			}else {
 				if value == 0 {
 					fmt.Printf("KEYRELEASED\ntype: %x\ncode: %d\nvalue: %d\nchar: %s \n", typ, code, value,c)
+					if m.TryLock() {
+						list = append(list,evt)
+						m.Unlock()				
+						timeTrack(n, "Keyreleased")
+					}else{
+						continue
+					} 	
 				}else if value == 2{
+					if m.TryLock() {
+						list = append(list,evt)
+						m.Unlock()				
+						timeTrack(n, "Held")
+					}else{
+						continue
+					} 
 					fmt.Printf("HELD\ntype: %x\ncode: %d\nvalue: %d\nchar: %s \n", typ, code, value,c)
-				}else{
+				}else{ 
+					// FIXME: not sure if we want to track weird keyevents?
 					fmt.Printf("Something weird\ntype: %x\ncode: %d\nvalue: %d\nchar: %s \n", typ, code, value,c)
 				}
 				timeTrack(n, "Others")
