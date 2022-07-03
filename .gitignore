@@ -1,0 +1,8 @@
+vendor
+
+frontend/dist
+frontend/node_modules
+frontend/bin/
+
+log.db
+
