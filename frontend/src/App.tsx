@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import logo from './assets/images/logo-universal.png';
 import './App.css';
 import {Greet, GetMostPressedKey, GetKeyEventData} from "../wailsjs/go/main/App";
+import { Box, Button, Flex, Select, Spacer } from '@chakra-ui/react';
 
 type EventData = {
     Char: string;
@@ -46,7 +47,24 @@ function App() {
     }, [])
 
     return (
-        <div id="App">
+        <Box w="100%">
+            <Flex>
+                <Box maxW="sm">
+                    <Select placeholder='Today'>
+                        <option value='1'>Today</option>
+                        <option value='7'>Last 7 days</option>
+                        <option value='30'>Last 30 days</option>
+                    </Select>
+                </Box>
+
+                <Spacer/>
+                
+                <Box maxW="sm">
+                    <Button color="white" bg="green">
+                        Logger is active                    
+                    </Button>
+                </Box>
+            </Flex>
             {count !== 0 ? "Char "+char+" count: "+count : "Count ei ole vielä saapunut"}
             {data.map(({Value,ValueName,Count,Char}) => {
                 return <h1>Value Name {ValueName} Count {Count} Char {Char}</h1>
@@ -55,7 +73,8 @@ function App() {
                 <input id="name" className="input" onChange={updateName} autoComplete="off" name="input" type="text"/>
                 <button className="btn" onClick={greet}>Greet</button>
             </div> */}
-        </div>
+        </Box>
+
     )
 }
 

@@ -2,7 +2,7 @@ vendor
 
 frontend/dist
 frontend/node_modules
-frontend/bin/
+build/bin/
 
 log.db
 
