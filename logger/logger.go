@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	ke "github.com/ferealqq/koki/pkg/keyevents"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,7 @@ func timeTrack(start time.Time, name string) {
 }
 
 var (
-	list []*KeyEvent
+	list []*ke.KeyEvent
 	m sync.RWMutex
 	_db *gorm.DB
 ) 
@@ -43,7 +44,7 @@ func saveKeyEvents(){
 
 				fmt.Printf("Written %d events to database\n",len(list))
 
-				list = *new([]*KeyEvent)
+				list = *new([]*ke.KeyEvent)
 
 
 				m.Unlock()
@@ -52,7 +53,7 @@ func saveKeyEvents(){
 		}
 }
 
-func logger() {
+func main() {
 	// Remember to use this procces own db variable and not the shared one.
 	d, err := gorm.Open(sqlite.Open("log.db"), &gorm.Config{})
 	if err != nil {
@@ -61,11 +62,11 @@ func logger() {
 		_db = d 
 		fmt.Println("Connected to database")
 	}
-	_db.AutoMigrate(&KeyEvent{})
+	_db.AutoMigrate(&ke.KeyEvent{})
 
 	var r2key = make(map[uint16]string)
 	
-	for k,c := range nKeys {
+	for k,c := range ke.NKeys {
 		r2key[c] = k
 	}
 	// save changes to database
@@ -94,7 +95,7 @@ func logger() {
 		c, ok := r2key[code]
 		if ok {
 			fmt.Println(t)
-			evt := &KeyEvent{
+			evt := &ke.KeyEvent{
 				Time: t.UnixNano(),
 				Char: c,
 				Value: value,

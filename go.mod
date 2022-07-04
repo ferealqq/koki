@@ -1,4 +1,4 @@
-module changeme
+module github.com/ferealqq/koki
 
 go 1.17
 

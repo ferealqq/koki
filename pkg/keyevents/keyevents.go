@@ -1,10 +1,10 @@
-package main
+package keyevents
 
 import "gorm.io/gorm"
 
 //https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
 // normal keys
-var nKeys = map[string]uint16{
+var NKeys = map[string]uint16{
 	"`": 41,
 	"1": 2,
 	"2": 3,
@@ -104,7 +104,7 @@ var (
 )
 
 // event value correlating human readable translation, Source: https://www.kernel.org/doc/Documentation/input/input.txt
-var valueMap = map[string]uint16{
+var ValueMap = map[string]uint16{
 	KEYPRESS: 0, 
 	KEYRELEASE: 1,
 	AUTOREPEAST: 2,

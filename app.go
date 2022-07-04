@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+
+	db "github.com/ferealqq/koki/pkg/database"
+	ke "github.com/ferealqq/koki/pkg/keyevents"
 )
 
 // App struct
@@ -37,14 +40,14 @@ type KeyData struct{
 func (a *App) GetKeyEventData(c string) []KeyData{
 	var rw2name = make(map[uint16]string)
 	
-	for k,c := range valueMap {
+	for k,c := range ke.ValueMap {
 		rw2name[c] = k
 	}
 
 	var res []KeyData
 
 
-	DB().Table("key_events").
+	db.Conn().Table("key_events").
 		Select("char", "value", "count(value) as count").
 		Where("char = ?",c).
 		Group("value, char").
@@ -66,7 +69,7 @@ type CharData struct {
 func (a *App) GetMostPressedKey() CharData{
 	var m []CharData
 
-	DB().Table("key_events").
+	db.Conn().Table("key_events").
 		Select("char", "count(*) as count").
 		Group("char").
 		Order("count desc").
