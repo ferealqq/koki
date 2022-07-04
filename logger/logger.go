@@ -88,7 +88,6 @@ func main() {
 		t := time.Unix(int64(sec), int64(usec))
 		var value int32
 		typ := binary.LittleEndian.Uint16(b[16:18])
-		// co := binary.LittleEndian.Uint64(b[18:20])
 		code := binary.LittleEndian.Uint16(b[18:20])
 		binary.Read(bytes.NewReader(b[20:]), binary.LittleEndian, &value)
 		

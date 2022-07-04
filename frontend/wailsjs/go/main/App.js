@@ -13,3 +13,11 @@ export function GetMostPressedKey() {
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
+
+export function IsLoggerActive() {
+  return window['go']['main']['App']['IsLoggerActive']();
+}
+
+export function ToggleLoggerDaemon() {
+  return window['go']['main']['App']['ToggleLoggerDaemon']();
+}

@@ -9,7 +9,7 @@ var db *gorm.DB
 
 func Conn() *gorm.DB{
 	if db == nil {
-		d, err := gorm.Open(sqlite.Open("log.db"), &gorm.Config{})
+		d, err := gorm.Open(sqlite.Open("logger/log.db"), &gorm.Config{})
 		if err != nil {
 			panic(err)
 		}

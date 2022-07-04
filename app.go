@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"os/exec"
+	"regexp"
 
 	db "github.com/ferealqq/koki/pkg/database"
 	ke "github.com/ferealqq/koki/pkg/keyevents"
@@ -80,4 +83,33 @@ func (a *App) GetMostPressedKey() CharData{
 	}
 
 	return CharData{}
+}
+
+func (a *App) IsLoggerActive() bool {
+	cmd := exec.Command("sudo", "systemctl", "status", "koki-logger")
+
+	if out, err := cmd.Output(); err != nil {
+		log.Println(err)
+		return false
+	}else{
+		if matched, err := regexp.MatchString("Active: active", string(out)); err == nil && matched {
+			return true
+		}
+	}
+	return false
+} 
+
+func (a *App) ToggleLoggerDaemon() (bool,error){
+	toggle := "start"
+	if a.IsLoggerActive() {
+		toggle = "stop"
+	}
+	cmd := exec.Command("sudo", "systemctl", toggle, "koki-logger")
+
+	if err := cmd.Run(); err != nil {
+		log.Println(err)
+		return false, nil
+	}
+
+	return true, nil
 }

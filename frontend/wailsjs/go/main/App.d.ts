@@ -7,3 +7,7 @@ export function GetKeyEventData(arg1:string):Promise<Array<main.KeyData>>;
 export function GetMostPressedKey():Promise<main.CharData>;
 
 export function Greet(arg1:string):Promise<string>;
+
+export function IsLoggerActive():Promise<boolean>;
+
+export function ToggleLoggerDaemon():Promise<boolean|Error>;

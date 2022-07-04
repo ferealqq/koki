@@ -1,8 +1,8 @@
 import {useState, useEffect} from 'react';
-import logo from './assets/images/logo-universal.png';
 import './App.css';
-import {Greet, GetMostPressedKey, GetKeyEventData} from "../wailsjs/go/main/App";
-import { Box, Button, Flex, Select, Spacer } from '@chakra-ui/react';
+import {GetMostPressedKey, GetKeyEventData, IsLoggerActive, ToggleLoggerDaemon} from "../wailsjs/go/main/App";
+import { Box, Text, Flex, Icon, IconButton, Select, Spacer, useToast } from '@chakra-ui/react';
+import { MdStop, MdNotStarted } from 'react-icons/md';
 
 type EventData = {
     Char: string;
@@ -12,44 +12,81 @@ type EventData = {
 }
 
 function App() {
-    const [resultText, setResultText] = useState("Please enter your name below 👇");
+    const toast = useToast();
     const [data, setData] = useState<EventData[]>([]);
     const [count, setCount] = useState(0);
     const [char, setChar] = useState('');
-    const [name, setName] = useState('');
-    const updateName = (e: any) => setName(e.target.value);
-    const updateResultText = (result: string) => setResultText(result);
 
-    function greet() {
-        Greet(name).then(updateResultText);
-    }
+    const [isActive, setActive] = useState(false);
 
     const onKeyPress = async (evt: any) => {
-        console.log(evt.target.value)
         await GetKeyEventData(evt.key).then((res) => {
             setData(res)
         })
-        // setChar(`code: ${evt.code}, key: ${evt.key}`)
     }
 
     useEffect(() => {
         window.addEventListener("keypress", onKeyPress);
 
-        (async () => {
-            await GetMostPressedKey().then((res:any) =>{
-                console.log(res)
+        (() => {
+            GetMostPressedKey().then((res:any) => {
                 setCount(res.Count)
                 setChar(res.Char)
             })
-        })()
+        })();
+
+        (() => {
+            IsLoggerActive().then(res => {
+                if(typeof res === "boolean") 
+                    setActive(res)
+                else {
+                    // FIXME: set error to true 
+                    setActive(false)
+                } 
+            })
+        })();
 
         return () => window.removeEventListener("keypress", onKeyPress);
     }, [])
 
+    const toggleLogger = () => {
+        ToggleLoggerDaemon().then(res => {
+            if(typeof res === "boolean"){
+                IsLoggerActive().then(active => {
+                    let title, description;
+                    if(active){
+                        title = "Logger deamon successfully started!";                        
+                        description = "Something";
+                    }else{
+                        title = "Logger daemon successfully stopped!";
+                        description = "Something";
+                    }
+                    toast({
+                        title,
+                        description,
+                        status: 'success',
+                        duration: 9000,
+                        isClosable: true,
+                    });
+                    setActive(active)
+                })
+            }else{
+                toast({
+                    title: 'Something went wrong while toggling logger daemon',
+                    description: "Navigate to the logs of koki to find the reason of deamon action failure.",
+                    status: 'warning',
+                    duration: 9000,
+                    isClosable: true,
+                })
+                throw res;
+            }
+        });
+    }
+
     return (
         <Box w="100%">
             <Flex>
-                <Box maxW="sm">
+                <Box maxW="sm" p="2">
                     <Select placeholder='Today'>
                         <option value='1'>Today</option>
                         <option value='7'>Last 7 days</option>
@@ -58,11 +95,39 @@ function App() {
                 </Box>
 
                 <Spacer/>
-                
-                <Box maxW="sm">
-                    <Button color="white" bg="green">
-                        Logger is active                    
-                    </Button>
+
+                <Box maxW="sm" display="flex" justifyContent="center" alignContent="center" p="2">
+                    {
+                        isActive ? 
+                            <IconButton
+                                aria-label='Stop the logger daemon'
+                                onClick={toggleLogger}
+                                bg="red.400"
+                                m="1"
+                                icon={
+                                    <Icon as={MdStop} boxSize={10} color="white"></Icon>
+                                }></IconButton>
+                        :
+                            <IconButton
+                                aria-label='Stop the logger daemon'
+                                onClick={toggleLogger}
+                                bg="green.400"
+                                m="1"
+                                icon={
+                                    <Icon as={MdNotStarted} boxSize={10} color="white"></Icon>
+                                }></IconButton>
+                    }
+                    <Spacer></Spacer>
+                    {
+                        isActive ? 
+                                <Text color="grey" my="auto" mx="1">
+                                    Logger is active                    
+                                </Text>
+                            :
+                                <Text mx="1" my="auto" color="grey">
+                                    Logger is not active
+                                </Text>                         
+                    }
                 </Box>
             </Flex>
             {count !== 0 ? "Char "+char+" count: "+count : "Count ei ole vielä saapunut"}
