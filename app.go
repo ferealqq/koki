@@ -6,6 +6,7 @@ import (
 	"log"
 	"os/exec"
 	"regexp"
+	"time"
 
 	db "github.com/ferealqq/koki/pkg/database"
 	ke "github.com/ferealqq/koki/pkg/keyevents"
@@ -50,7 +51,7 @@ func (a *App) GetKeyEventData(c string) []KeyData{
 	var res []KeyData
 
 
-	db.Conn().Table("key_events").
+	db.Conn().Table(db.KeyTable).
 		Select("char", "value", "count(value) as count").
 		Where("char = ?",c).
 		Group("value, char").
@@ -72,7 +73,7 @@ type CharData struct {
 func (a *App) GetMostPressedKey() CharData{
 	var m []CharData
 
-	db.Conn().Table("key_events").
+	db.Conn().Table(db.KeyTable).
 		Select("char", "count(*) as count").
 		Group("char").
 		Order("count desc").
@@ -112,4 +113,28 @@ func (a *App) ToggleLoggerDaemon() (bool,error){
 	}
 
 	return true, nil
+}
+
+type HourEvents struct {
+	Hour int
+	Count int
+}
+
+func (a *App) GetKeysPressedIn(hours int) []HourEvents {
+	n := time.Now().UnixNano()
+	n -= time.Hour.Nanoseconds() * int64(hours)
+
+	var events []HourEvents
+
+	fmt.Println(n)
+
+	db.Conn().Table(db.KeyTable).
+		Select("count(*) as count, strftime ('%H', created_at) hour").
+		Where("time > ?", n).
+		Where("type = 0").
+		Group("strftime ('%H',created_at)").
+		Order("hour").
+		Scan(&events);
+
+	return events
 }

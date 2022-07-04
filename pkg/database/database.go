@@ -7,6 +7,10 @@ import (
 
 var db *gorm.DB
 
+var (
+	KeyTable = "key_events"
+)
+
 func Conn() *gorm.DB{
 	if db == nil {
 		d, err := gorm.Open(sqlite.Open("logger/log.db"), &gorm.Config{})
@@ -27,3 +31,6 @@ func Close() {
 
 	db.Close()
 }
+//SELECT COUNT(Id),strftime ('%H',timestamp) hour
+//FROM T
+//GROUP BY strftime ('%H',timestamp)

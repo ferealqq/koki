@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import './App.css';
-import {GetMostPressedKey, GetKeyEventData, IsLoggerActive, ToggleLoggerDaemon} from "../wailsjs/go/main/App";
+import {GetMostPressedKey, GetKeyEventData, IsLoggerActive, ToggleLoggerDaemon, GetKeysPressedIn} from "../wailsjs/go/main/App";
 import { Box, Text, Flex, Icon, IconButton, Select, Spacer, useToast } from '@chakra-ui/react';
 import { MdStop, MdNotStarted } from 'react-icons/md';
 
@@ -138,9 +138,29 @@ function App() {
                 <input id="name" className="input" onChange={updateName} autoComplete="off" name="input" type="text"/>
                 <button className="btn" onClick={greet}>Greet</button>
             </div> */}
+            <Today />
         </Box>
-
     )
+}
+
+type HourEvents = {
+    Hour: number;
+    Count: number;
+}
+
+const Today = () => {
+    const [hourEventCount, setHEC] = useState<HourEvents[]>([]);
+    
+    useEffect(()=>{
+        (() => {
+            GetKeysPressedIn(12).then(data => {
+                setHEC(data)
+            })
+        })()
+    },[])
+
+    // return ()
+    return <Text> size: {hourEventCount.length} </Text>
 }
 
 export default App
