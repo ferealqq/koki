@@ -7,5 +7,5 @@ cat /proc/bus/input/devices
 
 Run:
 ```terminal
-go build . && sudo ./kiko
+go build . && sudo ./koki
 ```
