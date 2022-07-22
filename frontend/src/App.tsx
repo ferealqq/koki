@@ -138,7 +138,7 @@ function App() {
                 <input id="name" className="input" onChange={updateName} autoComplete="off" name="input" type="text"/>
                 <button className="btn" onClick={greet}>Greet</button>
             </div> */}
-            <Today />
+            {/* <Today /> */}
         </Box>
     )
 }

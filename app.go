@@ -128,9 +128,11 @@ func (a *App) GetKeysPressedIn(hours int) []HourEvents {
 
 	fmt.Println(n)
 
+	// SELECT COUNT(id),strftime ('%H',created_at)+3 hour FROM key_events GROUP BY strftime ('%H',created_at);
+
 	db.Conn().Table(db.KeyTable).
-		Select("count(*) as count, strftime ('%H', created_at) hour").
-		Where("time > ?", n).
+		Select("count(*) as count, strftime ('%H', created_at)+3 hour"). // hacky workaround for 3+GMT
+		Where("time > ?", n). 
 		Where("type = 0").
 		Group("strftime ('%H',created_at)").
 		Order("hour").
