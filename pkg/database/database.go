@@ -31,6 +31,17 @@ func Close() {
 
 	db.Close()
 }
+// test connection
+func TConn(dbFile string) *gorm.DB {
+	if db == nil {
+		d, err := gorm.Open(sqlite.Open(dbFile), &gorm.Config{})
+		if err != nil {
+			panic(err)
+		}
+		db = d 
+	}
+	return db
+}
 //SELECT COUNT(Id),strftime ('%H',timestamp) hour
 //FROM T
 //GROUP BY strftime ('%H',timestamp)

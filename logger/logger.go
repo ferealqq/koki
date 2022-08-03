@@ -39,9 +39,19 @@ func saveKeyEvents(){
 			case <-tic.C:
 				n := time.Now()
 				m.Lock()
-
+				// set char type values to every item in a list
+				for i, v := range list {
+					if _, ok := ke.CKeys[v.Char]; ok {
+						list[i].CharType = string(ke.CHAR)
+					}
+					if _, ok := ke.SKeys[v.Char]; ok {
+						list[i].CharType = string(ke.SPECIAL)
+					}
+					if _, ok := ke.FKeys[v.Char]; ok {
+						list[i].CharType = string(ke.FUNCTION)
+					}
+				}
 				_db.CreateInBatches(list, 100)
-
 				fmt.Printf("Written %d events to database\n",len(list))
 
 				list = *new([]*ke.KeyEvent)
@@ -66,7 +76,7 @@ func main() {
 
 	var r2key = make(map[uint16]string)
 	
-	for k,c := range ke.NKeys {
+	for k,c := range ke.NKeys() {
 		r2key[c] = k
 	}
 	// save changes to database
