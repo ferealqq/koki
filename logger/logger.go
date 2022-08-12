@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
+
+	"io/ioutil"
 
 	ke "github.com/ferealqq/koki/pkg/keyevents"
 	"gorm.io/driver/sqlite"
@@ -53,6 +56,26 @@ func saveKeyEvents(){
 		}
 }
 
+const INPUT_BY_ID_DIR = "/dev/input/by-id"
+const KEYBOARD_INPUT_EXTENSION = "-event-kbd"
+
+func getKeyboardInputPath(id string) (string, error) {
+	files, e := ioutil.ReadDir(INPUT_BY_ID_DIR)
+	if e != nil {
+		return "", e
+	}
+
+	var inputPath string
+	for _, file := range files { 
+		if strings.Contains(file.Name(), id+KEYBOARD_INPUT_EXTENSION) {
+			inputPath = file.Name()
+		}
+		fmt.Printf("file name %s\n",file.Name())
+	}
+
+	return INPUT_BY_ID_DIR+"/"+inputPath, nil 
+}
+
 func main() {
 	// Remember to use this procces own db variable and not the shared one.
 	d, err := gorm.Open(sqlite.Open("log.db"), &gorm.Config{})
@@ -72,9 +95,12 @@ func main() {
 	// save changes to database
 	go saveKeyEvents()
 
-
+	inputPath, err := getKeyboardInputPath("usb-ZSA_Technology_Labs_Moonlander_Mark_I")
+	if err != nil { 
+		panic(err)
+	}
 	// change according to your keyboards event file
-	f, err := os.Open("/dev/input/event2")
+	f, err := os.Open(inputPath)
 	if err != nil {
 		panic(err)
 	}
