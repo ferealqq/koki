@@ -1,10 +1,11 @@
 package keyevents
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
-//https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
-// normal keys
-var NKeys = map[string]uint16{
+// character keys
+var CKeys = map[string]uint16{
 	"`": 41,
 	"1": 2,
 	"2": 3,
@@ -55,6 +56,9 @@ var NKeys = map[string]uint16{
 	",": 51,
 	".": 52,
 	"/": 53,
+}
+// Function keys
+var FKeys = map[string]uint16{
 	//
 	"f1":  59,
 	"f2":  60,
@@ -68,6 +72,10 @@ var NKeys = map[string]uint16{
 	"f10": 68,
 	"f11": 69,
 	"f12": 70,
+}
+
+// special keys
+var SKeys = map[string]uint16{
 	// more
 	"esc":     1,
 	"delete":  14,
@@ -87,6 +95,29 @@ var NKeys = map[string]uint16{
 	"down":    57424,
 	"left":    57419,
 	"right":   57421,
+}
+
+// keys that seperate a word from another
+var Seps = []uint16{
+	14, // delete
+	57, // space
+	28, // enter
+}
+
+//https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
+// all keys 
+func NKeys() map[string]uint16 {
+	var r  = make(map[string]uint16)
+	for k,v := range CKeys { 
+		r[k] = v 
+	}
+	for k,v := range FKeys { 
+		r[k] = v 
+	}
+	for k,v := range SKeys { 
+		r[k] = v 
+	}
+	return r
 }
 
 // moonlander weird keys
@@ -112,6 +143,14 @@ var ValueMap = map[string]uint16{
 	UNKNOWN: 3,	
 }
 
+type CharType string
+
+const (
+    SPECIAL  CharType = "SPECIAL"
+    FUNCTION CharType = "FUNCTION"
+    CHAR CharType = "CHAR"
+)
+
 //https://www.kernel.org/doc/Documentation/input/input.txt
 type KeyEvent struct {
 	gorm.Model
@@ -121,4 +160,6 @@ type KeyEvent struct {
 	Value int32
 
 	Char string
+	// CharType string `gorm:"default:NULL;check:char_type IN ('SPECIAL','FUNCTION','CHAR', NULL)"`
+	CharType string `gorm:"check:char_type IN ('SPECIAL','FUNCTION','CHAR', NULL)"`
 }
